@@ -83,7 +83,7 @@ app.post("/api/user/create", async (req, res) => {
           });
         } else {
           console.log("2");
-          return res.status(400).json({ msg: "something went wrong" });
+          return res.status(400).json({ msg: "something went wrong",err });
         }
       }
 
