@@ -3,6 +3,7 @@ const cors = require("cors");
 const app = express();
 const studentRoutes = require("./routes/StudentRoutes");
 const mysql = require("mysql");
+const mysql2 = require("mysql2");
 const dotenv = require("dotenv");
 dotenv.config();
 const porting = process.env.PORTYET;
@@ -10,22 +11,21 @@ const porting = process.env.PORTYET;
 app.use(cors());
 app.use(express.json());
 
+// ///////// Mysql ///////
 // const db = mysql.createConnection({
-//     host:"localhost",
-//     user:"root",
-//     password:"root",
-//     database:"dbms",
+//   host: process.env.host,
+//   user: process.env.user,
+//   password: process.env.password,
+//   database: process.env.database,
+//   port:process.env.port,
 // });
 
-const db = mysql.createConnection({
-  host: process.env.host,
-  user: process.env.user,
-  password: process.env.password,
-  database: process.env.database,
-  port:process.env.port
-});
 
-db.connect((err, result) => {
+///// mysql2 /////////////////
+const db = mysql2.createConnection(process.env.DATABASE_URL);
+///////////////////////////////
+
+db.connect((err, result) => {  
   if (err) {
     console.log("err", err);
   }
@@ -349,4 +349,5 @@ app.get("/api/user/biodata/:roll",async(req,res)=>{
 
 });
 
+db.end();
 app.listen(porting, console.log("listening to the port", porting));
