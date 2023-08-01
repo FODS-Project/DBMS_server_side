@@ -1,9 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const studentRoutes = require("./routes/StudentRoutes");
-const mysql = require("mysql");
-const mysql2 = require("mysql2");
+const mysql2 = require("mysql");
+const mysql = require("mysql2");
 const dotenv = require("dotenv");
 dotenv.config();
 const porting = process.env.PORTYET;
@@ -12,17 +11,17 @@ app.use(cors());
 app.use(express.json());
 
 // ///////// Mysql ///////
-// const db = mysql.createConnection({
-//   host: process.env.host,
-//   user: process.env.user,
-//   password: process.env.password,
-//   database: process.env.database,
-//   port:process.env.port,
-// });
-
+const db = mysql.createConnection({
+  host: process.env.host,
+  user: process.env.user,
+  password: process.env.password,
+  database: process.env.database,
+  port:process.env.port,
+});
+    
 
 ///// mysql2 /////////////////
-const db = mysql2.createConnection(process.env.DATABASE_URL);
+// const db = mysql2.createConnection(process.env.DATABASE_URL);
 ///////////////////////////////
 
 db.connect((err, result) => {  
@@ -33,25 +32,28 @@ db.connect((err, result) => {
 });
 // app.use("/api/user",studentRoutes);
 
-const sqlSearchTable = "SELECT * FROM USER_details;";
+const sqlSearchTable = "SELECT * FROM DBMS_ERP_USER_details;";
 const createTable =
-  "CREATE TABLE USER_details (roll varchar(25) primary key,stakeholdertype varchar(2),passwrd varchar(50),fname varchar(30),lname varchar(30),gender varchar(2), cat varchar(5), DOB date, email varchar(50), dept varchar(30));";
+  "CREATE TABLE DBMS_ERP_USER_details (roll varchar(25) primary key,stakeholdertype varchar(2),passwrd varchar(50),fname varchar(30),lname varchar(30),gender varchar(2), cat varchar(5), DOB date, email varchar(50), dept varchar(30));";
 const insertValues =
-  "INSERT INTO USER_details (roll,stakeholdertype,passwrd,fname,lname,gender,cat,DOB,email,dept) VALUES (?,?,?,?,?,?,?,?,?,?) ;";
-const dataSearch = "select * from USER_details where roll=? and passwrd=?;";
-const profilesearch = "select * from USER_details  where roll=?";
+  "INSERT INTO DBMS_ERP_USER_details (roll,stakeholdertype,passwrd,fname,lname,gender,cat,DOB,email,dept) VALUES (?,?,?,?,?,?,?,?,?,?) ;";
+const dataSearch =
+  "select * from DBMS_ERP_USER_details where roll=? and passwrd=?;";
+const profilesearch = "select * from DBMS_ERP_USER_details  where roll=?";
 
 const createTableBiodata =
-  "create table USER_biodata(roll  varchar(25) primary key,phone varchar(12),inst_mail varchar(50),Guardmail varchar(50),Guardphone varchar(12),address varchar(255), city varchar(30),policeSt varchar(30),pincode varchar(10),district varchar(30),state varchar(30),country varchar(30),emgphone varchar(12),emgperson varchar(25),emgrelation varchar(30),emgaddress varchar(255),father varchar(25),income integer, guardname varchar(25),profession varchar(50),foreign key(roll) references USER_details(roll));";
-const biodataSearch="select * from USER_biodata where roll=?;"
-const updateprofile="update USER_details set dept=?,email=? where roll=? ;"
+  "create table DBMS_ERP_USER_biodata(roll  varchar(25) primary key,phone varchar(12),inst_mail varchar(50),Guardmail varchar(50),Guardphone varchar(12),address varchar(255), city varchar(30),policeSt varchar(30),pincode varchar(10),district varchar(30),state varchar(30),country varchar(30),emgphone varchar(12),emgperson varchar(25),emgrelation varchar(30),emgaddress varchar(255),father varchar(25),income integer, guardname varchar(25),profession varchar(50),foreign key(roll) references USER_details(roll));";
+const biodataSearch = "select * from DBMS_ERP_USER_biodata where roll=?;";
+const updateprofile =
+  "update DBMS_ERP_USER_details set dept=?,email=? where roll=? ;";
 
-const updatebiodata="update USER_biodata set phone=?,inst_mail=?,Guardmail=?,Guardphone=?,address=?,city=?,policeSt=?,pincode=?,district=?,state=?,country=?,emgphone=?,emgperson=?,emgrelation=?,emgaddress=?,father=?,income=?,guardname=?,profession=? where roll=? ;";
+const updatebiodata =
+  "update DBMS_ERP_USER_biodata set phone=?,inst_mail=?,Guardmail=?,Guardphone=?,address=?,city=?,policeSt=?,pincode=?,district=?,state=?,country=?,emgphone=?,emgperson=?,emgrelation=?,emgaddress=?,father=?,income=?,guardname=?,profession=? where roll=? ;";
 
 const insertintobiodata =
-  "insert into USER_biodata (phone,inst_mail,Guardmail,Guardphone,address,city,policeSt,pincode,district,state,country,emgphone,emgperson,emgrelation,emgaddress,father,income,guardname,profession,roll) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+  "insert into DBMS_ERP_USER_biodata (phone,inst_mail,Guardmail,Guardphone,address,city,policeSt,pincode,district,state,country,emgphone,emgperson,emgrelation,emgaddress,father,income,guardname,profession,roll) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-  const findbiodata="select roll from USER_biodata where roll=?;";
+  const findbiodata = "select roll from DBMS_ERP_USER_biodata where roll=?;";
 
 
 app.post("/api/user/create", async (req, res) => {
@@ -132,7 +134,10 @@ app.get("/api/user/get/:roll/:passwrd", async (req, res) => {
     db.query(dataSearch, [roll, passwrd], (err, result) => {
       if (err) {
         console.log(err);
-        return;
+        return res.status(200).json({
+          msg: "User Not Registered/(wrong credential)",
+          result,
+        });
       }
       if (result.length == 0) {
         return res.status(200).json({
@@ -143,7 +148,7 @@ app.get("/api/user/get/:roll/:passwrd", async (req, res) => {
       return res.status(200).json({ msg: "Login successful", result });
     });
   } catch (e) {
-    return res.status(400).json({ msg: "Error while Login" });
+    return res.status(400).json({ msg: "Error while Login" });    
   }
 });
 
@@ -318,12 +323,12 @@ app.get("/api/user/biodata/:roll",async(req,res)=>{
      catch(e){
       return res.status(400).json({ msg: "Error while getting biodata" });
       
-    }
+    }      
   });
   
 
-  const deleteStudentbiodata="delete from USER_biodata where roll=?";
-  const deleteStudentprofile="delete from USER_details where roll=?";
+  const deleteStudentbiodata = "delete from DBMS_ERP_USER_biodata where roll=?";
+  const deleteStudentprofile = "delete from DBMS_ERP_USER_details where roll=?";
   app.post("/api/user/remove/student",async(req,res)=>{
     try{
            const {roll}=req.body;
@@ -343,11 +348,11 @@ app.get("/api/user/biodata/:roll",async(req,res)=>{
            })
 
     }catch(e){
-      
+       
       return res.status(400).json({ msg: "Error while removing student",e });
   }
 
 });
 
-db.end();
-app.listen(porting, console.log("listening to the port", porting));
+app.listen(porting, ()=>{console.log("listening to the port", porting)
+});
