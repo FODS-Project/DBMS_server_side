@@ -1,5 +1,5 @@
 
-# ERP Database system Client Side
+# ERP Database system Server Side
 
 A ERP system is in use for various activities of students and Institute employee for ease of there action, requirements and mainly to store databse of Students/Staff at my Institute.
 
